@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/go-redis/redis"
+	// "github.com/gorilla/mux"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -26,12 +27,15 @@ var (
 
 	// Error
 	err error
+
+	// Multiplexer
+	// router *mux.Router
 )
 
 func init() {
 
 	// Init Template
-	tpl = template.Must(template.ParseGlob("templates/*"))
+	tpl = template.Must(template.ParseGlob("assets/templates/*"))
 
 	// Init DB
 	DB, err = sql.Open("pgx", os.Getenv("DATABASE_URL"))
@@ -54,7 +58,7 @@ func main() {
 	// Test all periphals
 	err = DB.Ping()
 	if err != nil {
-		log.Fatalln("Cannot connect to Database")
+		log.Fatalln("Cannot connect to Database", err)
 	}
 
 	if err = rdb.Ping().Err(); err != nil {
@@ -62,6 +66,13 @@ func main() {
 	}
 
 	fmt.Println("Connection secured!")
+
+	// router = mux.NewRouter()
+
+
+	http.HandleFunc("/login", login)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+	http.HandleFunc("/dashboard", dashboard)
 
 	http.ListenAndServe(":8080", nil)
 

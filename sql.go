@@ -18,17 +18,18 @@ func checkLogindata(username, password string) error {
 	stmt, err := DB.Prepare(`
 	SELECT username, password
 	FROM userlogin
-	WHERE username = ?
+	WHERE username=$1
 	`)
-	if err != nil  {
+	if err != nil {
 		return err
 	}
-
+	
 	// Execute the query
 	row := stmt.QueryRow(username)
 
 	// Retrieve Data from Database
-	err = row.Scan(&activeuser.Us, &activeuser.Ps); if err != nil {
+	err = row.Scan(&activeuser.Us, &activeuser.Ps)
+	if err != nil {
 		return err
 	}
 

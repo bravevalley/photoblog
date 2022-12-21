@@ -27,11 +27,32 @@ func login(w http.ResponseWriter, req *http.Request) {
 
 	// Check if it is a form submit
 	if req.Method == http.MethodPost {
+
 		us := req.FormValue("Username")
 		pw := req.FormValue("Password")
+		em := req.FormValue("Email")
+		si := req.FormValue("SignUP")
+
+		fmt.Println(si)
+
+		if si == "Sign Up" {
+
+			err = createUser(us, pw, em); if err != nil {
+				if err.Error() == "UserExist" {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				
+			}
+
+			http.Redirect(w, req, "/login", http.StatusSeeOther)
+			return
+		}
 
 		// Check if there is a user with the username and Password
-		err = checkLogindata(us, pw); if err != nil {
+		err = checkLogindata(us, pw)
+		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Println(err)
 			return
@@ -62,3 +83,4 @@ func login(w http.ResponseWriter, req *http.Request) {
 func dashboard(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
+

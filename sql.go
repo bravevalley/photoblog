@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,6 +40,31 @@ func checkLogindata(username, password string) error {
 	// Check if username and password is correct
 	if username != activeuser.Us || err != nil {
 		return fmt.Errorf("WrongInfo")
+	}
+
+	return nil
+}
+
+func createUser(Username, Password, Email string) error {
+	ps, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("Unable to encrypt password")
+	}
+
+	stmt, err := DB.Prepare(`
+	INSERT INTO userlogin
+	VALUES($1, $2, $3);
+	`)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			return fmt.Errorf("UserExist")
+		}
+		return fmt.Errorf("Can not prepare insert statement")
+	}
+
+	_, err = stmt.Exec(Username, string(ps), Email); if err != nil {
+		return fmt.Errorf("Can not create user")
 	}
 
 	return nil

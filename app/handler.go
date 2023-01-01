@@ -1,15 +1,25 @@
-package main
+package app
 
 import (
 	// "io"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+
+	"photo.blog/db"
+	"photo.blog/session"
 
 	"github.com/google/uuid"
 )
 
-func login(w http.ResponseWriter, req *http.Request) {
+type Handlers struct {
+	Template *template.Template
+	// Database  *sql.DB
+	// Redis *redis.Client
+}
+
+func (h *Handlers) login(w http.ResponseWriter, req *http.Request) {
 	// io.WriteString(w, "Got here")
 
 	// Check if there is a cookie
@@ -18,7 +28,7 @@ func login(w http.ResponseWriter, req *http.Request) {
 
 		// If there is a cookie, check if there is a session for the
 		// cookie id
-		if err = checkLogin(c.Value); err == nil {
+		if err = session.CheckLogin(c.Value); err == nil {
 			// There is a cookie and the cookie is in sessions db
 			http.Redirect(w, req, "/dashboard", http.StatusSeeOther)
 			return
@@ -37,13 +47,14 @@ func login(w http.ResponseWriter, req *http.Request) {
 
 		if si == "Sign Up" {
 
-			err = createUser(us, pw, em); if err != nil {
+			err = db.CreateUser(us, pw, em)
+			if err != nil {
 				if err.Error() == "UserExist" {
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 				w.WriteHeader(http.StatusUnauthorized)
-				
+
 			}
 
 			http.Redirect(w, req, "/login", http.StatusSeeOther)
@@ -51,7 +62,7 @@ func login(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// Check if there is a user with the username and Password
-		err = checkLogindata(us, pw)
+		err = db.CheckLogindata(us, pw)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			fmt.Println(err)
@@ -66,7 +77,7 @@ func login(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// Set the session ID in the Session Database
-		if err = createSession(c.Value, us); err != nil {
+		if err = session.CreateSession(c.Value, us); err != nil {
 			log.Fatalln("Cant create new user session; ", err)
 		}
 
@@ -77,10 +88,9 @@ func login(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/dashboard", http.StatusSeeOther)
 	}
 
-	tpl.ExecuteTemplate(w, "login.gohtml", nil)
+	h.Template.ExecuteTemplate(w, "login.gohtml", nil)
 }
 
 func dashboard(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
-

@@ -1,18 +1,21 @@
-package main
+package db
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
+var DB *sql.DB
+
 type userlogin struct {
 	Us string
 	Ps string
 }
 
-func checkLogindata(username, password string) error {
+func CheckLogindata(username, password string) error {
 	var activeuser userlogin
 
 	// Prepare the query for continuous use
@@ -24,7 +27,7 @@ func checkLogindata(username, password string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Execute the query
 	row := stmt.QueryRow(username)
 
@@ -45,7 +48,7 @@ func checkLogindata(username, password string) error {
 	return nil
 }
 
-func createUser(Username, Password, Email string) error {
+func CreateUser(Username, Password, Email string) error {
 	ps, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("Unable to encrypt password")
@@ -63,7 +66,8 @@ func createUser(Username, Password, Email string) error {
 		return fmt.Errorf("Can not prepare insert statement")
 	}
 
-	_, err = stmt.Exec(Username, string(ps), Email); if err != nil {
+	_, err = stmt.Exec(Username, string(ps), Email)
+	if err != nil {
 		return fmt.Errorf("Can not create user")
 	}
 

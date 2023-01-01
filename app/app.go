@@ -3,7 +3,6 @@ package app
 import (
 	"html/template"
 	"net/http"
-
 )
 
 type App struct {
@@ -18,7 +17,7 @@ func (app *App) Init(tpl *template.Template) {
 
 func (app *App) Run() {
 	app.Server = &http.Server{
-		Addr:"8080",
+		Addr:    "8080",
 		Handler: app.Router.Mux,
 	}
 

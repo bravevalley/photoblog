@@ -63,7 +63,7 @@ func main() {
 
 	fmt.Println("Connection secured!")
 
-	webapp := app.App{}
+	webapp := &app.App{}
 	webapp.Init(tpl)
 	webapp.Run()
 }

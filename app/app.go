@@ -2,6 +2,7 @@ package app
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -17,9 +18,9 @@ func (app *App) Init(tpl *template.Template) {
 
 func (app *App) Run() {
 	app.Server = &http.Server{
-		Addr:    "8080",
+		Addr:    ":8080",
 		Handler: app.Router.Mux,
 	}
 
-	app.Server.ListenAndServe()
+	log.Fatal(app.Server.ListenAndServe())
 }
